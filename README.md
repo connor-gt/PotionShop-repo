@@ -74,12 +74,15 @@ still just work.
 ![alt text](https://github.com/ccgstudiogit/PotionShop-repo/blob/main/demo-media/homepage_screenshot.jpg)
 
 # Search Functionality
+Potions:
 ![alt text](https://github.com/ccgstudiogit/PotionShop-repo/blob/main/demo-media/potions.gif)
 
+Ingredients:
 ![alt text](https://github.com/ccgstudiogit/PotionShop-repo/blob/main/demo-media/ingredients.gif)
 
 # Editing in Place
 ![alt text](https://github.com/ccgstudiogit/PotionShop-repo/blob/main/demo-media/edit-potion.gif)
 
 # Deleting Ingredients & Relationships
+Deleting an ingredient also removes whatever relationship(s) it had with potions:
 ![alt text](https://github.com/ccgstudiogit/PotionShop-repo/blob/main/demo-media/delete-ingredient.gif)
