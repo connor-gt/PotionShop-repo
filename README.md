@@ -1,88 +1,127 @@
-# Potion Shop - Full-Stack CRUD Application 🧪
+# Potion Shop
 
-A small full‑stack practice project built with Java + Springboot for the backend and vanilla HTML, CSS, and JavaScript for the frontend. The database uses
-PostgreSQL. The goal was to create a retro‑styled potion shop interface with a working backend and a containerized database.
+**Description**: Potion Shop is a full-stack potion and ingredient manager with a retro/pixel style shop GUI. You can create potions, put together their recipes, and search the catalog using combinations of filters.
 
-# Features
-Potion management:
- - Create, edit, and delete potions
- - Assign ingredients to potions with quantities
- - Many-to-many relationship between potions and ingredients
- - Automatic UI updates after CRUD operations
+**Details**: HTML, CSS, vanilla JavaScript, Java 25, Spring Boot, Spring Data JPA, and PostgreSQL. Docker Compose is used to run the database.
 
-Ingredient management:
- - Create and delete ingredients
- - Linked to potions through a join table
- - When ingredients are deleted, their link to their potion(s) is also deleted
+**Development Timeline**: March 2026 - May 2026
 
-Search and Filtering:
- - Search potions and ingredients by attributes (name, type, rarity, price, etc.)
- - Can combine filters for precise results (i.e. get all potions of types Healing and Buff with a price >= 40)
- - Sort potions/ingredients A-Z or Z-A
+<p align="center">
+  <img src="demo-media/homepage_screenshot.jpg" alt="Potion Shop interface showing potion cards, search filters, and the potion creation form" width="920">
+</p>
 
-UI & UX:
- - Fully custom vanilla JS UI (I wanted to learn vanilla JS so I have an understanding of how JS works when I eventually start working with frameworks)
- - Modular rendering system, meaning that basically all of the HTML is generated via JS at runtime
-   - This was done by using factories, i.e. element-factory.js
- - Modal window popups for confirmations and errors
- - Layout and lists always stay up to date, so no stale data is displayed
+## Features
 
-# Tech Stack
-Backend:
- - Java 25
- - Spring Boot, Spring Boot JPA
- - PostgreSQL
- - RESTful API design
- - Service/controller/repository design
+Each potion has a name, type, price, effect, and a recipe containing ingredients with individual quantities. Potions can be created, edited in place, and deleted. Ingredients can be created separately and shared across multiple recipes.
 
- Frontend:
-  - HTML
-  - CSS
-  - Vanilla JavaScript (with modules)
-  - Custom rendering and state management
+The catalog supports partial name searches, multiple potion types or ingredient rarities, and price comparisons. Filters can be combined, such as finding Healing or Buff potions with a price of at least 40. Results can also be sorted alphabetically.
 
-# Running the Project
-Backend setup:
- - Install Java 25
- - Install PostgreSQL
- - Create a database named potionshop (I use Docker)
- - Update application.properties with DB credentials (found in potionshop/src/main/resources)
- - Build and run the application (I use IntelliJ as my IDE to build/run)
+Deleting an ingredient removes it from the recipes that use it while keeping those potions. Deleting a potion removes its recipe relationships while keeping the ingredients available for other potions.
 
-To reset the database (wipe all changes and start off with starting data), go to potionshop/src/main/resources/application.properties and navigate to the line
-spring.jpa.hibernate.ddl-auto=update (line 15). Change update to either create or create-drop, like this: spring.jpa.hibernate.ddl-auto=create then restart the
-backend. At this point, the current tables will be overwritten with newly created tables with the seed data.
+| Searching and filtering potions | Searching and filtering ingredients |
+| :---: | :---: |
+| <img src="demo-media/potions.gif" alt="Searching and filtering the potion catalog" width="420"> | <img src="demo-media/ingredients.gif" alt="Searching and filtering the ingredient catalog" width="420"> |
 
-Frontend setup:
- - Open frontend/index.html in a local server (I use VSCode with Live Server). This is required since the modules need a live server
- - Ensure the backend uis running at the URL defined in frontend/scripts/api/api-utils.js (baseURL is http://localhost:8080/)
+| Editing a potion | Deleting a shared ingredient |
+| :---: | :---: |
+| <img src="demo-media/edit-potion.gif" alt="Editing a potion and its ingredients within the catalog" width="420"> | <img src="demo-media/delete-ingredient.gif" alt="Deleting an ingredient and removing its relationships with potions" width="420"> |
 
-# Development Timeline
-March 2026 - May 2026
+## Design Decisions
 
-# Development Reflection
-This was my first attempt at a full-stack CRUD project, and my goal was to become more familiar with not only how full-stack development works, but also generally
-to learn how frontends and backends interact with each other, how Spring Boot works with Java, to get more experience with HTML, CSS, and JS, and to challenge
-myself. The biggest challenge I faced was the frontend, as I feel as though I have a somewhat backend-adjacent background with my Unity games. One particular
-challenge that gave me a tough time was the potion add and edit forms. There was a lot to manage, especially with the ingredients, adding/removing them, updating
-quantities, making sure that duplicates aren't allowed, etc. I also feel like my code could be even more modular and lego-brick-like, but the way I designed my
-systems it was actually pretty easy to implement new things and to refactor. At one point, I did a complete overhaul of the frontend design because the previous
-one just wasn't going to work, but the way I designed scripts such as potion-add-form.js and potion-form-utils.js it was easy to move stuff around and have things
-still just work.
+### Reusable frontend components
 
-# Homepage Screenshot
-![alt text](https://github.com/ccgstudiogit/PotionShop-repo/blob/main/demo-media/homepage_screenshot.jpg)
+I built the frontend with vanilla JavaScript modules because I wanted experience working directly with the DOM before moving to a framework. Most of the interface is generated by JavaScript.
 
-# Search Functionality
-Potions:
-![alt text](https://github.com/ccgstudiogit/PotionShop-repo/blob/main/demo-media/potions.gif)
+I went with a factory pattern to handle DOM setup (scroll down to the code tour below to quickly go to some of the relevant scripts). The potion form utilities also build larger reusable pieces that the add/edit forms use.
 
-Ingredients:
-![alt text](https://github.com/ccgstudiogit/PotionShop-repo/blob/main/demo-media/ingredients.gif)
+This made it easier to rearrange the interface during a frontend redesign without rewriting all of the form behavior. Rendering, application actions, and API requests also live in separate modules.
 
-# Editing in Place
-![alt text](https://github.com/ccgstudiogit/PotionShop-repo/blob/main/demo-media/edit-potion.gif)
+### Potions, ingredients, and recipe quantities
 
-# Deleting Ingredients & Relationships
-Deleting an ingredient also removes whatever relationship(s) it had with potions:
-![alt text](https://github.com/ccgstudiogit/PotionShop-repo/blob/main/demo-media/delete-ingredient.gif)
+Potions and ingredients have a many-to-many relationship. I represented that relationship with a `PotionIngredient` entity because each ingredient needs a quantity specific to the potion using it.
+
+For example, two potions can use the same ingredient while requiring different amounts. The quantity belongs to the recipe entry rather than to the ingredient itself.
+
+Each recipe entry is identified by the combination of its potion ID and ingredient ID. The services also handle relationship cleanup before deleting either parent:
+
+- Deleting a potion removes its recipe entries and preserves the ingredients.
+- Deleting an ingredient removes its entries across all affected recipes and preserves the potions.
+
+### Combined search filters
+
+The backend builds searches using JPA Specifications. Different filter categories narrow the results together, while multiple selections within a category act as alternatives.
+
+For example, selecting Healing and Buff with a minimum price of 40 finds potions that match either type and also meet the price requirement.
+
+## Code Tour
+
+### Frontend
+
+| Starting point | What to look for |
+| --- | --- |
+| [Element factory](frontend/scripts/utils/element-factory.js) and [button factory](frontend/scripts/utils/button-factory.js) | Shared functions for creating elements, applying classes, and attaching button behavior. |
+| [Potion form utilities](frontend/scripts/ui/potions/potion-form-utils.js) | Reusable inputs and the ingredient selection component, including its state and change callback. |
+| [Add form](frontend/scripts/ui/potions/potion-add-form.js) and [edit form](frontend/scripts/ui/potions/potion-edit-form.js) | How the shared components are assembled for creating and updating potions. |
+| [Potion actions](frontend/scripts/actions/potion-actions.js) and [potion API](frontend/scripts/api/potion-api.js) | How form data becomes an API request and how responses are prepared for the frontend GUI. |
+
+### Backend
+
+| Starting point | What to look for |
+| --- | --- |
+| [PotionIngredient](potionshop/src/main/java/com/connor/potionshop/model/potioningredient/PotionIngredient.java) and [its composite key](potionshop/src/main/java/com/connor/potionshop/model/potioningredient/PotionIngredientPk.java) | The relationship entity, its two parent references, and the quantity stored for each recipe entry. |
+| [PotionService](potionshop/src/main/java/com/connor/potionshop/service/PotionService.java) and [IngredientService](potionshop/src/main/java/com/connor/potionshop/service/IngredientService.java) | Potion creation and updates, recipe changes, and relationship cleanup during deletion. |
+| [Potion specifications](potionshop/src/main/java/com/connor/potionshop/model/potion/PotionSpecification.java) and [ingredient specifications](potionshop/src/main/java/com/connor/potionshop/model/ingredient/IngredientSpecification.java) | The individual conditions used to build combined searches. |
+| [Controllers](potionshop/src/main/java/com/connor/potionshop/controller) and [mappers](potionshop/src/main/java/com/connor/potionshop/mapper) | The HTTP endpoints and the conversion between database entities and API data. |
+
+## Running Locally
+
+### Requirements
+
+- JDK 25
+- Docker Desktop with Docker Compose
+- A local frontend server, such as VS Code Live Server
+
+The backend includes a Maven wrapper, so a separate Maven installation is not required.
+
+### Start the database and backend
+
+From the repository root, open a terminal and run:
+
+```powershell
+cd potionshop
+docker compose up -d
+```
+
+Once PostgreSQL is ready, start the backend:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+On macOS or Linux, use `./mvnw spring-boot:run` instead.
+
+The included Docker Compose configuration runs PostgreSQL on `localhost:4321` and matches the connection settings in [application.properties](potionshop/src/main/resources/application.properties).
+
+The backend runs at `http://localhost:8080`. Sample potions, ingredients, and recipe entries are added on startup when both the potion and ingredient tables are empty.
+
+### Start the frontend
+
+Open the `frontend` directory as a folder in VS Code, then open `index.html` using Live Server. Serve this directory as the server root so the existing icon paths resolve correctly.
+
+The frontend connects to `http://localhost:8080`, configured in [api-utils.js](frontend/scripts/api/api-utils.js). If you change the backend address, update this value too.
+
+The project also includes [springdoc-openapi](https://springdoc.org/) for generated API documentation. With the backend running, open [Swagger UI](http://localhost:8080/swagger-ui.html) to explore the endpoints.
+
+## Looking Back
+
+This was my first full-stack project and my first time using Spring Boot. I also had very little experience using HTML, CSS, and JavaScript together like this, so a big part of the project was learning how the interface, API, and database fit together.
+
+The frontend gave me the most trouble, especially the potion forms. Selecting ingredients, changing quantities, and keeping the add and edit forms consistent involved more state than I initially expected. I chose vanilla JavaScript because I wanted to understand those problems directly before using a framework.
+
+I'm particularly proud of the reusable form components and the potion-ingredient relationship model. At one point, I completely changed the frontend layout, and having shared form utilities made it much easier to move things around. On the backend, working with recipe quantities and deletion behavior helped me understand why relationships sometimes need their own entities.
+
+Looking back, I would put more attention into keeping form data separate from the rendered inputs and testing what happens when a database operation fails partway through. This project gave me a much clearer understanding of full-stack development and some concrete ideas for what I would improve next.
+
+## Credits
+
+Pixel icons: [Free Assorted Icons by Quintino Pixels](https://quintino-pixels.itch.io/assorted-icons), released under CC0 1.0.
